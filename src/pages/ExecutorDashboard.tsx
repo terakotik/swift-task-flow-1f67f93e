@@ -39,6 +39,27 @@ const DEMO_TASKS: Task[] = [
   },
 ];
 
+function TimerBadge({ expiresAt }: { expiresAt: string }) {
+  const [timeLeft, setTimeLeft] = useState('');
+  useEffect(() => {
+    const update = () => {
+      const diff = new Date(expiresAt).getTime() - Date.now();
+      if (diff <= 0) { setTimeLeft('Истекло'); return; }
+      const m = Math.floor(diff / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
+    };
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+  return (
+    <span className="text-[9px] font-black text-warning uppercase">
+      ⏱ {timeLeft}
+    </span>
+  );
+}
+
 interface Props {
   demoMode?: boolean;
   onExitDemo?: () => void;
