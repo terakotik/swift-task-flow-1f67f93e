@@ -66,15 +66,16 @@ export default function Landing() {
               <p className="text-xs text-muted-foreground mb-3">
                 Чтобы получить доступ к заданиям и начать зарабатывать, свяжитесь с администратором. Мы работаем только с проверенными исполнителями.
               </p>
-              <a
-                href="https://t.me/yoclick_admin"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => {
+                  setInstructionOpen(true);
+                  setTimeout(() => document.getElementById('instruction-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                }}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
               >
                 <MessageCircle size={16} />
                 Написать администратору
-              </a>
+              </button>
             </div>
           </div>
 
@@ -188,7 +189,8 @@ export default function Landing() {
       </section>
 
       {/* Instruction */}
-      <section id="how" className="px-6 py-16 max-w-5xl mx-auto">
+      <section id="how" className="px-6 py-16 max-w-5xl mx-auto" ref={undefined}>
+        <div id="instruction-section" />
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
           <button
             onClick={() => setInstructionOpen(!instructionOpen)}
@@ -310,12 +312,18 @@ export default function Landing() {
                       Правила прочитаны, РФ-аккаунт Яндекс активен
                     </span>
                   </label>
-                  <button
-                    disabled={!agreeChecked}
-                    className="w-full md:w-auto bg-primary text-primary-foreground px-12 py-4 rounded-xl font-black text-sm md:text-base uppercase tracking-widest transition-all duration-200 disabled:bg-muted disabled:text-muted-foreground hover:bg-primary/90"
+                  <a
+                    href={agreeChecked ? "https://t.me/brusnika_s" : undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => { if (!agreeChecked) e.preventDefault(); }}
+                    className={`w-full md:w-auto px-12 py-4 rounded-xl font-black text-sm md:text-base uppercase tracking-widest transition-all duration-200 flex items-center justify-center ${agreeChecked ? 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}
                   >
                     СОГЛАСЕН
-                  </button>
+                  </a>
+                  <p className="w-full text-center text-xs text-muted-foreground mt-3 md:mt-0 md:w-auto">
+                    💬 Вступительное сообщение: <span className="font-bold text-foreground">"правила прочитаны"</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -356,15 +364,16 @@ export default function Landing() {
           <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
             Напиши администратору, получи доступ и выполняй задания уже сегодня.
           </p>
-          <a
-            href="https://t.me/yoclick_admin"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => {
+              setInstructionOpen(true);
+              setTimeout(() => document.getElementById('instruction-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
+            }}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors"
           >
             <MessageCircle size={18} />
             Написать администратору
-          </a>
+          </button>
         </div>
       </section>
 
