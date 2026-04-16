@@ -7,33 +7,40 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const checkRole = async (u: User | null) => {
+    if (u) {
+      const { data } = await supabase.from('user_roles').select('role').eq('user_id', u.id);
+      setIsAdmin(data?.some(r => r.role === 'admin') ?? false);
+    } else {
+      setIsAdmin(false);
+    }
+  };
+
   useEffect(() => {
+    let mounted = true;
+
+    // Set up listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
+      if (!mounted) return;
       const u = session?.user ?? null;
       setUser(u);
-      if (u) {
-        const { data } = await supabase.from('user_roles').select('role').eq('user_id', u.id);
-        setIsAdmin(data?.some(r => r.role === 'admin') ?? false);
-      } else {
-        setIsAdmin(false);
-      }
+      await checkRole(u);
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Then get initial session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
       const u = session?.user ?? null;
       setUser(u);
-      if (u) {
-        supabase.from('user_roles').select('role').eq('user_id', u.id).then(({ data }) => {
-          setIsAdmin(data?.some(r => r.role === 'admin') ?? false);
-          setLoading(false);
-        });
-      } else {
-        setLoading(false);
-      }
+      await checkRole(u);
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = () => supabase.auth.signOut();
