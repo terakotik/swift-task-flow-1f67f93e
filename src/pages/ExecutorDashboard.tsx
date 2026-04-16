@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -256,21 +256,27 @@ export default function ExecutorDashboard({ demoMode = false, onExitDemo }: Prop
             {availableTasks.length === 0 && (
               <p className="text-center text-muted-foreground py-12">Нет доступных заданий</p>
             )}
-            {availableTasks.map(task => (
-              <div
-                key={task.id}
-                className="task-card bg-card p-5 rounded-2xl border border-border shadow-sm flex justify-between items-center cursor-pointer active:scale-[0.98] transition-transform"
-                onClick={() => setCurrentTask(task)}
-              >
-                <div className="flex-1 pr-4">
-                  <h3 className="font-black text-foreground text-sm truncate uppercase">{task.name}</h3>
-                  <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight break-all">ID: {task.task_id}</p>
+            {availableTasks.map(task => {
+              const hasTimer = !!task.expires_at;
+              return (
+                <div
+                  key={task.id}
+                  className="task-card bg-card p-5 rounded-2xl border border-border shadow-sm flex justify-between items-center cursor-pointer active:scale-[0.98] transition-transform"
+                  onClick={() => setCurrentTask(task)}
+                >
+                  <div className="flex-1 pr-4">
+                    <h3 className="font-black text-foreground text-sm truncate uppercase">{task.name}</h3>
+                    <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight break-all">ID: {task.task_id}</p>
+                    {hasTimer && (
+                      <TimerBadge expiresAt={task.expires_at!} />
+                    )}
+                  </div>
+                  <span className="text-[10px] font-black uppercase px-2 py-1 rounded-md bg-primary/10 text-primary">
+                    Начать
+                  </span>
                 </div>
-                <span className="text-[10px] font-black uppercase px-2 py-1 rounded-md bg-primary/10 text-primary">
-                  Начать
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </>
         )}
 
