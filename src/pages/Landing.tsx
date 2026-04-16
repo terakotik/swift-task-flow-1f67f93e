@@ -103,32 +103,17 @@ export default function Landing() {
                       <Wallet size={16} className="text-accent" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-accent">{currentPay.amount}</p>
-                      <p className="text-xs text-muted-foreground">{currentPay.uid}</p>
+                      <p className="text-sm font-bold text-accent">{payment.amount}</p>
+                      <p className="text-xs text-muted-foreground">{payment.uid}</p>
                     </div>
                   </div>
 
-                  <div
-                    key={`brand-${animKey}`}
-                    className="bg-secondary rounded-xl p-3 flex items-center gap-3"
-                    style={{
-                      animation: 'slideInUp 0.4s ease-out 0.1s both',
-                    }}
-                  >
+                  <div className="bg-secondary rounded-xl p-3 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Star size={16} className="text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold">{currentBrand}</p>
-                      <div className="flex gap-0.5">
-                        {[1,2,3,4,5].map(i => (
-                          <Star key={i} size={10} className="text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
+                      <p className="text-sm font-semibold">Яндекс Еда</p>
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground">Задания обновляются ежедневно</p>
                 </div>
