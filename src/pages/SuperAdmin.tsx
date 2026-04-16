@@ -31,7 +31,7 @@ interface Task {
 }
 
 export default function SuperAdmin() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, isAdmin, signOut } = useAuth();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,17 +41,24 @@ export default function SuperAdmin() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const isSuperAdmin = user?.email === SUPER_ADMIN_EMAIL;
+  const canManageTasks = isSuperAdmin && isAdmin;
 
   useEffect(() => {
     if (isSuperAdmin) loadData();
   }, [isSuperAdmin]);
 
   const loadData = async () => {
-    const [{ data: profilesData }, { data: rolesData }, { data: tasksData }] = await Promise.all([
+    const [{ data: profilesData, error: profilesError }, { data: rolesData, error: rolesError }, { data: tasksData, error: tasksError }] = await Promise.all([
       supabase.from('profiles').select('user_id, display_name, email, balance, created_at').order('created_at', { ascending: false }),
       supabase.from('user_roles').select('user_id, role'),
       supabase.from('tasks').select('id, name, addr1, addr2, created_at, status').order('created_at', { ascending: false }),
     ]);
+
+    if (profilesError || rolesError || tasksError) {
+      toast({ title: 'Ошибка загрузки', description: profilesError?.message || rolesError?.message || tasksError?.message, variant: 'destructive' });
+      return;
+    }
+
     setProfiles(profilesData ?? []);
     setRoles(rolesData ?? []);
     setTasks(tasksData ?? []);
@@ -63,15 +70,35 @@ export default function SuperAdmin() {
   };
 
   const deleteTask = async (taskId: string) => {
-    await supabase.from('tasks').delete().eq('id', taskId);
-    setTasks(prev => prev.filter(t => t.id !== taskId));
+    if (!canManageTasks) {
+      toast({ title: 'Нет прав', description: 'Для удаления заданий аккаунту vt@admin.com нужна роль admin.', variant: 'destructive' });
+      return;
+    }
+
+    const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+    if (error) {
+      toast({ title: 'Ошибка удаления', description: error.message, variant: 'destructive' });
+      return;
+    }
+
+    await loadData();
     toast({ title: 'Задание удалено' });
   };
 
   const deleteAllTasks = async () => {
     if (!confirm('Удалить ВСЕ задания? Это действие необратимо.')) return;
-    await supabase.from('tasks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    setTasks([]);
+    if (!canManageTasks) {
+      toast({ title: 'Нет прав', description: 'Для удаления заданий аккаунту vt@admin.com нужна роль admin.', variant: 'destructive' });
+      return;
+    }
+
+    const { error } = await supabase.from('tasks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (error) {
+      toast({ title: 'Ошибка удаления', description: error.message, variant: 'destructive' });
+      return;
+    }
+
+    await loadData();
     toast({ title: 'Все задания удалены' });
   };
 
@@ -162,9 +189,12 @@ export default function SuperAdmin() {
 
       <main className="p-4 space-y-3 pb-20">
         {/* Delete all tasks */}
-        <Button onClick={deleteAllTasks} variant="destructive" className="w-full font-black uppercase gap-2 rounded-2xl h-12">
+        <Button onClick={deleteAllTasks} variant="destructive" className="w-full font-black uppercase gap-2 rounded-2xl h-12" disabled={!canManageTasks}>
           <Trash2 size={18} /> Удалить все задания ({tasks.length})
         </Button>
+        {!canManageTasks && (
+          <p className="text-xs text-destructive font-semibold">Удаление выключено: аккаунту vt@admin.com не выдана роль admin.</p>
+        )}
 
         {/* User list */}
         <h2 className="text-sm font-black text-foreground uppercase tracking-widest pt-2">Все пользователи</h2>
@@ -206,7 +236,7 @@ export default function SuperAdmin() {
                 <p className="text-[10px] text-muted-foreground font-semibold">{t.addr1}</p>
                 <p className="text-[9px] text-muted-foreground">{new Date(t.created_at).toLocaleString('ru-RU')}</p>
               </div>
-              <Button onClick={() => deleteTask(t.id)} variant="destructive" size="sm" className="ml-2 rounded-xl h-8 w-8 p-0">
+              <Button onClick={() => deleteTask(t.id)} variant="destructive" size="sm" className="ml-2 rounded-xl h-8 w-8 p-0" disabled={!canManageTasks}>
                 <Trash2 size={14} />
               </Button>
             </div>
