@@ -232,6 +232,12 @@ export default function AdminDashboard() {
     toast({ title: 'Задание заархивировано' });
   };
 
+  const deleteTask = async (taskId: string) => {
+    await supabase.from('tasks').delete().eq('id', taskId);
+    loadAllTasks();
+    toast({ title: 'Задание удалено' });
+  };
+
   const archivedTasks = allTasks.filter(t => t.status === 'archived');
   const activeTasks = allTasks.filter(t => t.status === 'available');
 

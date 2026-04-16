@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import AdminDashboard from './AdminDashboard';
 
 export default function AdminAuth() {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, signOut } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
