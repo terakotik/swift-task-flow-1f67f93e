@@ -18,6 +18,30 @@ interface CompletedTaskWithDetails {
   tasks: { name: string; task_id: string } | null;
 }
 
+function NewOrTimeBadge({ createdAt }: { createdAt: string }) {
+  const [label, setLabel] = useState('');
+  useEffect(() => {
+    const update = () => {
+      const diff = Date.now() - new Date(createdAt).getTime();
+      if (diff < 60000) {
+        setLabel('🆕 Новое');
+      } else {
+        const d = new Date(createdAt);
+        setLabel(d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }));
+      }
+    };
+    update();
+    const id = setInterval(update, 10000);
+    return () => clearInterval(id);
+  }, [createdAt]);
+  const isNew = label.includes('Новое');
+  return (
+    <span className={`text-[9px] font-black uppercase ${isNew ? 'text-accent' : 'text-muted-foreground'}`}>
+      {label}
+    </span>
+  );
+}
+
 function TimerBadge({ expiresAt }: { expiresAt: string }) {
   const [timeLeft, setTimeLeft] = useState('');
   useEffect(() => {
@@ -271,6 +295,7 @@ export default function ExecutorDashboard({ demoMode = false, onExitDemo }: Prop
                     <h3 className="font-black text-foreground text-sm uppercase">{task.name.split(' · ')[0]}</h3>
                     {task.name.includes(' · ') && <p className="text-[10px] text-muted-foreground font-bold">{task.name.split(' · ')[1]}</p>}
                     <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight break-all">ID: {task.task_id}</p>
+                    <NewOrTimeBadge createdAt={task.created_at} />
                     {hasTimer && (
                       <TimerBadge expiresAt={task.expires_at!} />
                     )}
