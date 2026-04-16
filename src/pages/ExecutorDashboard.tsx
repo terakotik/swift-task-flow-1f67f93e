@@ -104,8 +104,11 @@ export default function ExecutorDashboard({ demoMode = false, onExitDemo }: Prop
 
   const loadProfile = async () => {
     if (!user) return;
-    const { data } = await supabase.from('profiles').select('balance').eq('user_id', user.id).single();
-    if (data) setBalance(data.balance);
+    const { data } = await supabase.from('profiles').select('balance, display_name').eq('user_id', user.id).single();
+    if (data) {
+      setBalance(data.balance);
+      setDisplayName(data.display_name ?? '');
+    }
   };
 
   const loadCompletedTasks = async () => {
