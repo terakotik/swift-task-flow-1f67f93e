@@ -1,37 +1,29 @@
 import { Shield, Clock, Wallet, Lock, Users, ClipboardList, Star, Headphones, BookOpen, MessageCircle, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-const paymentNotifications = [
-  { amount: '+ 1 280 ₽', uid: 'UID: 12...34' },
-  { amount: '+ 3 750 ₽', uid: 'UID: 48...91' },
-  { amount: '+ 890 ₽', uid: 'UID: 77...03' },
-  { amount: '+ 2 450 ₽', uid: 'UID: 55...62' },
-  { amount: '+ 4 100 ₽', uid: 'UID: 31...88' },
-  { amount: '+ 1 670 ₽', uid: 'UID: 63...17' },
-  { amount: '+ 5 200 ₽', uid: 'UID: 22...45' },
-  { amount: '+ 960 ₽', uid: 'UID: 89...06' },
-];
+function randomAmount() {
+  const num = Math.floor(Math.random() * 900) + 100; // 100-999
+  return `+ ${num} ₽`;
+}
 
-const brandNames = ['Yandex Go', 'OZON', 'Wildberries', 'Сбер', 'Тинькофф', 'Авито', 'VK', '2ГИС'];
+function randomUID() {
+  const a = Math.floor(Math.random() * 90) + 10;
+  const b = Math.floor(Math.random() * 90) + 10;
+  return `UID: ${a}...${b}`;
+}
 
 export default function Landing() {
   const [instructionOpen, setInstructionOpen] = useState(false);
-  const [payIndex, setPayIndex] = useState(0);
-  const [brandIndex, setBrandIndex] = useState(0);
+  const [payment, setPayment] = useState({ amount: randomAmount(), uid: randomUID() });
   const [animKey, setAnimKey] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setPayIndex(prev => (prev + 1) % paymentNotifications.length);
-      setBrandIndex(prev => (prev + 1) % brandNames.length);
+      setPayment({ amount: randomAmount(), uid: randomUID() });
       setAnimKey(prev => prev + 1);
-    }, 2000);
+    }, 2200);
     return () => clearInterval(interval);
   }, []);
-
-  const currentPay = paymentNotifications[payIndex];
-  const currentBrand = brandNames[brandIndex];
-
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
@@ -111,23 +103,17 @@ export default function Landing() {
                       <Wallet size={16} className="text-accent" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-accent">{currentPay.amount}</p>
-                      <p className="text-xs text-muted-foreground">{currentPay.uid}</p>
+                      <p className="text-sm font-bold text-accent">{payment.amount}</p>
+                      <p className="text-xs text-muted-foreground">{payment.uid}</p>
                     </div>
                   </div>
 
-                  <div
-                    key={`brand-${animKey}`}
-                    className="bg-secondary rounded-xl p-3 flex items-center gap-3"
-                    style={{
-                      animation: 'slideInUp 0.4s ease-out 0.1s both',
-                    }}
-                  >
+                  <div className="bg-secondary rounded-xl p-3 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Star size={16} className="text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold">{currentBrand}</p>
+                      <p className="text-sm font-semibold">Яндекс Еда</p>
                       <div className="flex gap-0.5">
                         {[1,2,3,4,5].map(i => (
                           <Star key={i} size={10} className="text-yellow-400 fill-yellow-400" />
