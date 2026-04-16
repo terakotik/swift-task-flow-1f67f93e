@@ -50,7 +50,10 @@ export default function AdminAuth() {
             </Button>
           </form>
           {user && !isAdmin && (
-            <p className="text-destructive text-sm mt-4 text-center font-semibold">У вас нет прав администратора</p>
+            <div className="mt-4 text-center">
+              <p className="text-destructive text-sm font-semibold mb-2">У вас нет прав администратора</p>
+              <button onClick={signOut} className="text-sm text-primary font-semibold underline">Выйти и войти другим аккаунтом</button>
+            </div>
           )}
         </div>
       </div>
