@@ -57,9 +57,10 @@ function TimerBadge({ expiresAt }: { expiresAt: string }) {
     return () => clearInterval(id);
   }, [expiresAt]);
   return (
-    <span className="text-[9px] font-black text-warning uppercase">
-      ⏱ {timeLeft}
-    </span>
+    <div className="bg-warning/10 rounded-xl py-2 px-3 text-center mt-2">
+      <p className="text-[9px] font-bold text-warning/70 uppercase tracking-wider">Задание будет снято через</p>
+      <p className="text-xl font-black text-warning">⏱ {timeLeft}</p>
+    </div>
   );
 }
 
@@ -316,11 +317,14 @@ export default function ExecutorDashboard({ demoMode = false, onExitDemo }: Prop
             )}
             {myCompleted.map(ct => {
               const s = statusLabel(ct.status);
+              const taskName = ct.tasks?.name ?? 'Задание';
+              const nameParts = taskName.split(' · ');
               return (
                 <div key={ct.id} className={`bg-card p-5 rounded-2xl border shadow-sm space-y-2 ${ct.status === 'done' ? 'border-accent/30' : 'border-border'}`}>
                   <div className="flex justify-between items-start">
                     <div className="flex-1 pr-3">
-                      <h3 className="font-black text-foreground text-sm uppercase">{ct.tasks?.name ?? 'Задание'}</h3>
+                      <h3 className="font-black text-foreground text-sm uppercase">{nameParts[0]}</h3>
+                      {nameParts[1] && <p className="text-[10px] text-muted-foreground font-bold">{nameParts[1]}</p>}
                       <p className="text-[9px] text-muted-foreground font-bold">Заказ: {ct.order_number}</p>
                     </div>
                     <div className="flex flex-col items-end gap-0.5">
