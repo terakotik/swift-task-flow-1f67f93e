@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { LogOut, Plus, CheckCircle, Clock, Package } from 'lucide-react';
+import { LogOut, Plus, CheckCircle, Clock, Package, Archive, RotateCcw } from 'lucide-react';
 
 interface CompletedTask {
   id: string;
@@ -20,29 +20,56 @@ interface CompletedTaskWithProfile extends CompletedTask {
   executor_name?: string;
 }
 
+interface TaskInfo {
+  id: string;
+  task_id: string;
+  name: string;
+  status: string;
+  expires_at: string | null;
+  created_at: string;
+}
+
 function parseTaskText(text: string): { name: string; addr1: string; addr2: string; link: string; task_id: string } | null {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-  
+
   let addr1 = '';
   let addr2 = '';
   let link = '';
   let name = '';
 
+  const skipPatterns = [
+    /^российская\s+федерация/i,
+    /^россия/i,
+    /^москва$/i,
+    /^\[/,
+    /^яндекс$/i,
+  ];
+
   for (const line of lines) {
     if (line.startsWith('http') && line.includes('eda.yandex')) {
       if (!link) link = line;
-    } else if (line.startsWith('[') || line === 'Яндекс') {
       continue;
-    } else if (!addr1) {
-      addr1 = line;
+    }
+    if (skipPatterns.some(p => p.test(line))) continue;
+
+    // Remove leading "Российская Федерация, Москва, " or "Москва, " from address lines
+    const cleaned = line
+      .replace(/^Российская\s+Федерация,?\s*/i, '')
+      .replace(/^Россия,?\s*/i, '')
+      .replace(/^Москва,?\s*/i, '')
+      .trim();
+
+    if (!cleaned) continue;
+
+    if (!addr1) {
+      addr1 = cleaned;
     } else if (!addr2) {
-      addr2 = line;
+      addr2 = cleaned;
     }
   }
 
   if (!link || !addr1 || !addr2) return null;
 
-  // Extract restaurant name from link slug
   const slugMatch = link.match(/placeSlug=([^&]+)/);
   if (slugMatch) {
     name = slugMatch[1].replace(/_/g, ' ').replace(/\s+[a-z0-9]+$/, '').toUpperCase();
@@ -52,7 +79,7 @@ function parseTaskText(text: string): { name: string; addr1: string; addr2: stri
   }
 
   // Add street to name for branch identification
-  const streetMatch = addr1.match(/(?:улица|ул\.|переулок|проспект|бульвар|шоссе)\s+[^,]+/i) 
+  const streetMatch = addr1.match(/(?:улица|ул\.|переулок|проспект|бульвар|шоссе)\s+[^,]+/i)
     || addr1.match(/([^,]+)/);
   if (streetMatch) {
     name = name + ' · ' + streetMatch[0].trim();
@@ -67,31 +94,59 @@ export default function AdminDashboard() {
   const { signOut } = useAuth();
   const { toast } = useToast();
   const [completedTasks, setCompletedTasks] = useState<CompletedTaskWithProfile[]>([]);
+  const [allTasks, setAllTasks] = useState<TaskInfo[]>([]);
   const [showAddTask, setShowAddTask] = useState(false);
   const [taskText, setTaskText] = useState('');
-  const [activeTab, setActiveTab] = useState<'pending' | 'done'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'done' | 'archive'>('pending');
+
+  // Timer selection state
+  const [parsedTask, setParsedTask] = useState<ReturnType<typeof parseTaskText>>(null);
+  const [showTimerSelect, setShowTimerSelect] = useState(false);
+  const [selectedTimer, setSelectedTimer] = useState<'30' | '60' | 'none'>('none');
 
   useEffect(() => {
     loadCompletedTasks();
+    loadAllTasks();
+    // Check expired tasks every 30s
+    const interval = setInterval(checkExpiredTasks, 30000);
+    return () => clearInterval(interval);
   }, []);
+
+  const loadAllTasks = async () => {
+    const { data } = await supabase
+      .from('tasks')
+      .select('id, task_id, name, status, expires_at, created_at')
+      .order('created_at', { ascending: false });
+    setAllTasks(data ?? []);
+  };
+
+  const checkExpiredTasks = async () => {
+    const now = new Date().toISOString();
+    await supabase
+      .from('tasks')
+      .update({ status: 'archived' })
+      .eq('status', 'available')
+      .lt('expires_at', now)
+      .not('expires_at', 'is', null);
+    loadAllTasks();
+  };
 
   const loadCompletedTasks = async () => {
     const { data } = await supabase
       .from('completed_tasks')
       .select('*, tasks(task_id, name)')
       .order('created_at', { ascending: false });
-    
+
     if (!data) { setCompletedTasks([]); return; }
 
-    // Fetch executor names separately
     const userIds = [...new Set(data.map(d => d.user_id))];
     const { data: profiles } = await supabase
       .from('profiles')
       .select('user_id, display_name')
       .in('user_id', userIds);
-    
+
     const profileMap = new Map(profiles?.map(p => [p.user_id, p.display_name]) ?? []);
-    
+
     setCompletedTasks(data.map(ct => ({
       ...ct,
       tasks: ct.tasks as any,
@@ -112,30 +167,57 @@ export default function AdminDashboard() {
       await supabase.from('profiles').update({ balance: profile.balance + 20 }).eq('user_id', ct.user_id);
     }
     loadCompletedTasks();
-    toast({ title: 'Готово! 20₽ зачислено исполнителю' });
+    toast({ title: 'Готово!' });
   };
 
-  const addTask = async () => {
+  const handleParseTask = () => {
     const parsed = parseTaskText(taskText);
     if (!parsed) {
       toast({ title: 'Ошибка', description: 'Не удалось распознать задание. Вставьте текст с адресами и ссылкой.', variant: 'destructive' });
       return;
     }
+    setParsedTask(parsed);
+    setSelectedTimer('none');
+    setShowAddTask(false);
+    setShowTimerSelect(true);
+  };
+
+  const confirmAddTask = async () => {
+    if (!parsedTask) return;
+
+    let expires_at: string | null = null;
+    if (selectedTimer === '30') {
+      expires_at = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    } else if (selectedTimer === '60') {
+      expires_at = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    }
+
     const { error } = await supabase.from('tasks').insert({
-      task_id: parsed.task_id,
-      name: parsed.name,
-      addr1: parsed.addr1,
-      addr2: parsed.addr2,
-      link: parsed.link,
+      task_id: parsedTask.task_id,
+      name: parsedTask.name,
+      addr1: parsedTask.addr1,
+      addr2: parsedTask.addr2,
+      link: parsedTask.link,
+      expires_at,
     });
     if (error) {
       toast({ title: 'Ошибка', description: error.message, variant: 'destructive' });
       return;
     }
     setTaskText('');
-    setShowAddTask(false);
+    setParsedTask(null);
+    setShowTimerSelect(false);
+    loadAllTasks();
     toast({ title: 'Задание добавлено' });
   };
+
+  const unarchiveTask = async (taskId: string) => {
+    await supabase.from('tasks').update({ status: 'available', expires_at: null }).eq('id', taskId);
+    loadAllTasks();
+    toast({ title: 'Задание восстановлено' });
+  };
+
+  const archivedTasks = allTasks.filter(t => t.status === 'archived');
 
   const filtered = completedTasks.filter(ct =>
     activeTab === 'pending' ? ct.status !== 'done' : ct.status === 'done'
@@ -173,65 +255,132 @@ export default function AdminDashboard() {
           >
             Завершённые
           </button>
+          <button
+            onClick={() => setActiveTab('archive')}
+            className={`flex-1 py-2 rounded-xl text-xs font-black uppercase ${activeTab === 'archive' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
+          >
+            Архив
+          </button>
         </div>
       </header>
 
       <main className="p-4 space-y-3">
-        {filtered.length === 0 && (
-          <p className="text-center text-muted-foreground py-12">Пусто</p>
-        )}
-        {filtered.map(ct => (
-          <div key={ct.id} className="bg-card p-5 rounded-2xl border border-border shadow-sm space-y-3">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-black text-foreground text-sm uppercase">{ct.tasks?.name ?? 'Задание'}</h3>
-                <p className="text-[9px] text-muted-foreground font-bold uppercase">ID: {ct.tasks?.task_id}</p>
-                <p className="text-[9px] text-muted-foreground font-bold">Исполнитель: {ct.executor_name ? ct.executor_name.split('@')[0] : 'N/A'}</p>
-              </div>
-              <div className="flex items-center gap-1">
-                {ct.status === 'pending' && <Clock size={14} className="text-warning" />}
-                {ct.status === 'accepted' && <Package size={14} className="text-primary" />}
-                {ct.status === 'done' && <CheckCircle size={14} className="text-accent" />}
-                <span className="text-[10px] font-black uppercase text-muted-foreground">
-                  {ct.status === 'pending' ? 'Ожидает' : ct.status === 'accepted' ? 'Принят' : 'Готово'}
-                </span>
-              </div>
-            </div>
-            <div className="bg-muted rounded-xl p-3">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Номер заказа</p>
-              <p className="text-foreground font-black text-lg">{ct.order_number}</p>
-            </div>
-            {ct.status !== 'done' && (
-              <div className="flex gap-2">
-                {ct.status === 'pending' && (
-                  <Button onClick={() => acceptTask(ct.id)} variant="outline" className="flex-1 font-bold text-xs">
-                    Принял заказ
-                  </Button>
-                )}
-                <Button onClick={() => completeTask(ct)} className="flex-1 font-bold text-xs bg-accent text-accent-foreground hover:bg-accent/90">
-                  Готово ✓
+        {activeTab === 'archive' ? (
+          <>
+            {archivedTasks.length === 0 && (
+              <p className="text-center text-muted-foreground py-12">Архив пуст</p>
+            )}
+            {archivedTasks.map(task => (
+              <div key={task.id} className="bg-card p-5 rounded-2xl border border-border shadow-sm space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-black text-foreground text-sm uppercase">{task.name}</h3>
+                    <p className="text-[9px] text-muted-foreground font-bold uppercase">ID: {task.task_id}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Archive size={14} className="text-muted-foreground" />
+                    <span className="text-[10px] font-black uppercase text-muted-foreground">Истекло</span>
+                  </div>
+                </div>
+                <Button onClick={() => unarchiveTask(task.id)} variant="outline" className="w-full font-bold text-xs gap-2">
+                  <RotateCcw size={14} /> Восстановить
                 </Button>
               </div>
+            ))}
+          </>
+        ) : (
+          <>
+            {filtered.length === 0 && (
+              <p className="text-center text-muted-foreground py-12">Пусто</p>
             )}
-          </div>
-        ))}
+            {filtered.map(ct => (
+              <div key={ct.id} className="bg-card p-5 rounded-2xl border border-border shadow-sm space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-black text-foreground text-sm uppercase">{ct.tasks?.name ?? 'Задание'}</h3>
+                    <p className="text-[9px] text-muted-foreground font-bold uppercase">ID: {ct.tasks?.task_id}</p>
+                    <p className="text-[9px] text-muted-foreground font-bold">Исполнитель: {ct.executor_name ? ct.executor_name.split('@')[0] : 'N/A'}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {ct.status === 'pending' && <Clock size={14} className="text-warning" />}
+                    {ct.status === 'accepted' && <Package size={14} className="text-primary" />}
+                    {ct.status === 'done' && <CheckCircle size={14} className="text-accent" />}
+                    <span className="text-[10px] font-black uppercase text-muted-foreground">
+                      {ct.status === 'pending' ? 'Ожидает' : ct.status === 'accepted' ? 'Принят' : 'Готово'}
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-muted rounded-xl p-3">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Номер заказа</p>
+                  <p className="text-foreground font-black text-lg">{ct.order_number}</p>
+                </div>
+                {ct.status !== 'done' && (
+                  <div className="flex gap-2">
+                    {ct.status === 'pending' && (
+                      <Button onClick={() => acceptTask(ct.id)} variant="outline" className="flex-1 font-bold text-xs">
+                        Принял заказ
+                      </Button>
+                    )}
+                    <Button onClick={() => completeTask(ct)} className="flex-1 font-bold text-xs bg-accent text-accent-foreground hover:bg-accent/90">
+                      Готово ✓
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </>
+        )}
       </main>
 
-      {/* Add Task Modal - Simple Textarea */}
+      {/* Add Task Modal */}
       {showAddTask && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm" onClick={() => setShowAddTask(false)} />
           <div className="absolute bottom-0 left-0 right-0 bg-card rounded-t-[40px] p-8 pb-12 animate-in slide-in-from-bottom">
             <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-6" />
-            <h2 className="text-xl font-black text-foreground mb-4">Добавить задания</h2>
+            <h2 className="text-xl font-black text-foreground mb-4">Добавить задание</h2>
             <Textarea
-              placeholder="Вставьте текст заданий..."
+              placeholder="Вставьте текст задания с адресами и ссылкой..."
               value={taskText}
               onChange={e => setTaskText(e.target.value)}
               className="min-h-[200px] mb-4 rounded-2xl"
             />
-            <Button onClick={addTask} className="w-full font-black uppercase bg-accent text-accent-foreground hover:bg-accent/90 rounded-2xl h-14 text-base">
-              Добавить
+            <Button onClick={handleParseTask} className="w-full font-black uppercase bg-accent text-accent-foreground hover:bg-accent/90 rounded-2xl h-14 text-base">
+              Далее
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Timer Selection Modal */}
+      {showTimerSelect && parsedTask && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm" onClick={() => { setShowTimerSelect(false); setParsedTask(null); }} />
+          <div className="absolute bottom-0 left-0 right-0 bg-card rounded-t-[40px] p-8 pb-12 animate-in slide-in-from-bottom">
+            <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-6" />
+            <h2 className="text-xl font-black text-foreground mb-2">Новое задание</h2>
+            <p className="text-sm font-bold text-primary mb-1">{parsedTask.name}</p>
+            <p className="text-xs text-muted-foreground mb-6">{parsedTask.addr1} → {parsedTask.addr2}</p>
+
+            <p className="text-sm font-black text-foreground mb-3">Сколько времени будет работать наличка у этого ресторана?</p>
+            <div className="space-y-2 mb-6">
+              {([['30', '30 минут'], ['60', '1 час'], ['none', 'Без таймера']] as const).map(([val, label]) => (
+                <button
+                  key={val}
+                  onClick={() => setSelectedTimer(val)}
+                  className={`w-full py-3 px-4 rounded-2xl text-sm font-bold border-2 transition-all ${
+                    selectedTimer === val
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-card text-foreground'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <Button onClick={confirmAddTask} className="w-full font-black uppercase bg-accent text-accent-foreground hover:bg-accent/90 rounded-2xl h-14 text-base">
+              Добавить задание
             </Button>
           </div>
         </div>
