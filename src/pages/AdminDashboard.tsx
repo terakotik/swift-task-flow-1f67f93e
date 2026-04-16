@@ -97,7 +97,7 @@ export default function AdminDashboard() {
   const [allTasks, setAllTasks] = useState<TaskInfo[]>([]);
   const [showAddTask, setShowAddTask] = useState(false);
   const [taskText, setTaskText] = useState('');
-  const [activeTab, setActiveTab] = useState<'pending' | 'done' | 'archive' | 'mytasks'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'done' | 'archive' | 'mytasks'>('mytasks');
   const [taskExecutorCounts, setTaskExecutorCounts] = useState<Record<string, number>>({});
 
   // Timer selection state
@@ -291,6 +291,12 @@ export default function AdminDashboard() {
                     <div>
                       <h3 className="font-black text-foreground text-sm uppercase">{restaurant}</h3>
                       {street && <p className="text-[10px] text-muted-foreground font-bold">{street}</p>}
+                      {(() => {
+                        const diff = Date.now() - new Date(task.created_at).getTime();
+                        if (diff < 60000) return <span className="text-[9px] font-black text-accent uppercase">🆕 Новое</span>;
+                        const d = new Date(task.created_at);
+                        return <span className="text-[9px] font-black text-muted-foreground">{d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>;
+                      })()}
                     </div>
                     <div className="flex items-center gap-1">
                       <Users size={14} className="text-primary" />
