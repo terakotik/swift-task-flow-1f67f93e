@@ -1,8 +1,36 @@
 import { Shield, Clock, Wallet, Lock, Users, ClipboardList, Star, Headphones, BookOpen, MessageCircle, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+const paymentNotifications = [
+  { amount: '+ 1 280 ₽', uid: 'UID: 12...34' },
+  { amount: '+ 3 750 ₽', uid: 'UID: 48...91' },
+  { amount: '+ 890 ₽', uid: 'UID: 77...03' },
+  { amount: '+ 2 450 ₽', uid: 'UID: 55...62' },
+  { amount: '+ 4 100 ₽', uid: 'UID: 31...88' },
+  { amount: '+ 1 670 ₽', uid: 'UID: 63...17' },
+  { amount: '+ 5 200 ₽', uid: 'UID: 22...45' },
+  { amount: '+ 960 ₽', uid: 'UID: 89...06' },
+];
+
+const brandNames = ['Yandex Go', 'OZON', 'Wildberries', 'Сбер', 'Тинькофф', 'Авито', 'VK', '2ГИС'];
 
 export default function Landing() {
   const [instructionOpen, setInstructionOpen] = useState(false);
+  const [payIndex, setPayIndex] = useState(0);
+  const [brandIndex, setBrandIndex] = useState(0);
+  const [animKey, setAnimKey] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPayIndex(prev => (prev + 1) % paymentNotifications.length);
+      setBrandIndex(prev => (prev + 1) % brandNames.length);
+      setAnimKey(prev => prev + 1);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentPay = paymentNotifications[payIndex];
+  const currentBrand = brandNames[brandIndex];
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -56,11 +84,11 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Decorative card */}
+          {/* Animated decorative card */}
           <div className="flex-1 flex justify-center">
             <div className="relative w-72 h-80">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl blur-2xl" />
-              <div className="relative bg-card border border-border rounded-3xl p-6 h-full flex flex-col justify-between shadow-lg">
+              <div className="relative bg-card border border-border rounded-3xl p-6 h-full flex flex-col justify-between shadow-lg overflow-hidden">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
                     <span className="text-primary-foreground font-black text-sm">Y</span>
@@ -72,25 +100,37 @@ export default function Landing() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="bg-accent/10 rounded-xl p-3 flex items-center gap-3">
+                  <div
+                    key={`pay-${animKey}`}
+                    className="bg-accent/10 rounded-xl p-3 flex items-center gap-3"
+                    style={{
+                      animation: 'slideInUp 0.4s ease-out',
+                    }}
+                  >
                     <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
                       <Wallet size={16} className="text-accent" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-accent">+ 2 450 ₽</p>
-                      <p className="text-xs text-muted-foreground">UID: 48...91</p>
+                      <p className="text-sm font-bold text-accent">{currentPay.amount}</p>
+                      <p className="text-xs text-muted-foreground">{currentPay.uid}</p>
                     </div>
                   </div>
 
-                  <div className="bg-secondary rounded-xl p-3 flex items-center gap-3">
+                  <div
+                    key={`brand-${animKey}`}
+                    className="bg-secondary rounded-xl p-3 flex items-center gap-3"
+                    style={{
+                      animation: 'slideInUp 0.4s ease-out 0.1s both',
+                    }}
+                  >
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Star size={16} className="text-primary" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold">Yandex Go</p>
+                      <p className="text-sm font-semibold">{currentBrand}</p>
                       <div className="flex gap-0.5">
                         {[1,2,3,4,5].map(i => (
-                          <Star key={i} size={10} className="text-warning fill-warning" />
+                          <Star key={i} size={10} className="text-yellow-400 fill-yellow-400" />
                         ))}
                       </div>
                     </div>
@@ -202,7 +242,7 @@ export default function Landing() {
 
               <div className="space-y-2">
                 <h4 className="font-bold text-foreground">6. Получите выплату</h4>
-                <p>После подтверждения сумма будет зачислена на ваш баланс. Выплаты производятся на крипто-кошелек Bybit. Минимальная сумма вывода — 500 ₽.</p>
+                <p>После подтверждения сумма будет зачислена на ваш баланс. Выплаты производятся на крипто-кошелек Bybit. Минимальная сумма вывода — 200 ₽.</p>
               </div>
 
               <div className="bg-destructive/10 rounded-xl p-4 space-y-1">
@@ -225,15 +265,15 @@ export default function Landing() {
           Выплаты
         </h2>
         <p className="text-center text-muted-foreground text-sm mb-8 max-w-md mx-auto">
-          Мы платим каждый день. Минимальная сумма вывода — 500 ₽. Переводы на крипто-кошелек Bybit.
+          Мы платим каждый день. Минимальная сумма вывода — 200 ₽. Переводы на крипто-кошелек Bybit.
         </p>
         <div className="grid sm:grid-cols-3 gap-4 max-w-lg mx-auto">
           <div className="bg-card border border-border rounded-2xl p-5 text-center">
-            <p className="text-2xl font-black text-accent">50–150 ₽</p>
+            <p className="text-2xl font-black text-accent">от 20 ₽</p>
             <p className="text-xs text-muted-foreground mt-1">за одно задание</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-5 text-center">
-            <p className="text-2xl font-black text-primary">500 ₽</p>
+            <p className="text-2xl font-black text-primary">200 ₽</p>
             <p className="text-xs text-muted-foreground mt-1">мин. вывод</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-5 text-center">
@@ -270,6 +310,19 @@ export default function Landing() {
           © 2026 Yoclick. Human Intelligence Network.
         </p>
       </footer>
+
+      <style>{`
+        @keyframes slideInUp {
+          0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }
