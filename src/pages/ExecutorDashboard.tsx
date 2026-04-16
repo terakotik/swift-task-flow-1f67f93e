@@ -355,6 +355,63 @@ export default function ExecutorDashboard({ demoMode = false, onExitDemo }: Prop
         )}
       </main>
 
+      {/* Settings Modal */}
+      {showSettings && user && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm" onClick={() => setShowSettings(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-card rounded-t-[40px] p-8 pb-12 animate-in slide-in-from-bottom max-w-md mx-auto">
+            <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-6" />
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-black text-foreground">Настройки</h2>
+              <button onClick={() => setShowSettings(false)} className="p-2 bg-muted rounded-full">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <div className="bg-muted/50 rounded-2xl p-4">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Никнейм</p>
+                <p className="text-base font-black text-foreground">{displayName || 'Не указан'}</p>
+              </div>
+
+              <div className="bg-muted/50 rounded-2xl p-4">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">ID пользователя</p>
+                    <p className="text-xs font-mono font-bold text-foreground break-all">{user.id}</p>
+                  </div>
+                  <button
+                    onClick={() => copyText(user.id)}
+                    className="shrink-0 p-2 bg-primary/10 rounded-xl text-primary"
+                  >
+                    <CopyIcon size={16} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-accent/10 rounded-2xl p-4">
+                <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-1">Баланс</p>
+                <p className="text-3xl font-black text-accent">{balance}₽</p>
+              </div>
+            </div>
+
+            <Button
+              onClick={() => {
+                toast({
+                  title: 'Недостаточно баланса для вывода средств',
+                  description: 'Минимальная сумма для вывода — 200₽',
+                  variant: 'destructive',
+                });
+              }}
+              className="w-full font-black uppercase bg-foreground text-background hover:bg-foreground/90 h-12"
+            >
+              <Wallet size={18} className="mr-2" />
+              Вывести средства
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Instruction Modal */}
       {showInstruction && (
         <div className="fixed inset-0 z-50">
