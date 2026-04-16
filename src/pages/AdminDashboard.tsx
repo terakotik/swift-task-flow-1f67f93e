@@ -186,7 +186,7 @@ export default function AdminDashboard() {
               <div>
                 <h3 className="font-black text-foreground text-sm uppercase">{ct.tasks?.name ?? 'Задание'}</h3>
                 <p className="text-[9px] text-muted-foreground font-bold uppercase">ID: {ct.tasks?.task_id}</p>
-                <p className="text-[9px] text-muted-foreground font-bold">Исполнитель: {ct.executor_name ?? 'N/A'}</p>
+                <p className="text-[9px] text-muted-foreground font-bold">Исполнитель: {ct.executor_name ? ct.executor_name.split('@')[0] : 'N/A'}</p>
               </div>
               <div className="flex items-center gap-1">
                 {ct.status === 'pending' && <Clock size={14} className="text-warning" />}
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
                   </Button>
                 )}
                 <Button onClick={() => completeTask(ct)} className="flex-1 font-bold text-xs bg-accent text-accent-foreground hover:bg-accent/90">
-                  Готово (+20₽)
+                  Готово ✓
                 </Button>
               </div>
             )}
