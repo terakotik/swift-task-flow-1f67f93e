@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Landing from "./pages/Landing";
 import AdminAuth from "./pages/AdminAuth";
 import UserAuth from "./pages/UserAuth";
+import SuperAdmin from "./pages/SuperAdmin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/adminus" element={<AdminAuth />} />
           <Route path="/uzero" element={<UserAuth />} />
+          <Route path="/superadmin" element={<SuperAdmin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

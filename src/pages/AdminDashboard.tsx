@@ -232,6 +232,12 @@ export default function AdminDashboard() {
     toast({ title: 'Задание заархивировано' });
   };
 
+  const deleteTask = async (taskId: string) => {
+    await supabase.from('tasks').delete().eq('id', taskId);
+    loadAllTasks();
+    toast({ title: 'Задание удалено' });
+  };
+
   const archivedTasks = allTasks.filter(t => t.status === 'archived');
   const activeTasks = allTasks.filter(t => t.status === 'available');
 
@@ -340,9 +346,14 @@ export default function AdminDashboard() {
                       <span className="text-[10px] font-black uppercase text-muted-foreground">Архив</span>
                     </div>
                   </div>
-                  <Button onClick={() => unarchiveTask(task.id)} variant="outline" className="w-full font-bold text-xs gap-2">
-                    <RotateCcw size={14} /> Восстановить
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={() => unarchiveTask(task.id)} variant="outline" className="flex-1 font-bold text-xs gap-2">
+                      <RotateCcw size={14} /> Восстановить
+                    </Button>
+                    <Button onClick={() => deleteTask(task.id)} variant="destructive" className="flex-1 font-bold text-xs gap-2">
+                      Удалить
+                    </Button>
+                  </div>
                 </div>
               );
             })}

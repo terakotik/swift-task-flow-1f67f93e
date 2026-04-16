@@ -24,7 +24,7 @@ export default function UserAuth() {
     );
   }
 
-  if (user && !isAdmin) return <ExecutorDashboard />;
+  if (user) return <ExecutorDashboard />;
   if (demoMode) return <ExecutorDashboard demoMode onExitDemo={() => setDemoMode(false)} />;
 
   const handleSubmit = async (e: React.FormEvent) => {
