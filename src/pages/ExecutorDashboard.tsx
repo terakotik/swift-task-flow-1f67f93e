@@ -77,9 +77,11 @@ export default function ExecutorDashboard({ demoMode = false, onExitDemo }: Prop
   const [orderInput, setOrderInput] = useState('');
   const [showInstruction, setShowInstruction] = useState(false);
   const [balance, setBalance] = useState(0);
+  const [displayName, setDisplayName] = useState<string>('');
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [myCompleted, setMyCompleted] = useState<CompletedTaskWithDetails[]>([]);
   const [activeTab, setActiveTab] = useState<'available' | 'history'>('available');
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     if (demoMode || !user) return;
