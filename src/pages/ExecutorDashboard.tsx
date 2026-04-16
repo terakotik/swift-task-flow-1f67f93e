@@ -18,27 +18,6 @@ interface CompletedTaskWithDetails {
   tasks: { name: string; task_id: string } | null;
 }
 
-const DEMO_TASKS: Task[] = [
-  {
-    id: 'demo-1', task_id: 'vezem_losos_1739888235', name: 'VEZEM LOSOS · ул. Тургенева',
-    addr1: 'улица Тургенева, 155/1', addr2: 'улица Дальняя, 39/5',
-    link: 'https://eda.yandex.ru/r/vezem_losos_1739888235',
-    status: 'available', created_at: new Date().toISOString(), expires_at: null, created_by: null,
-  },
-  {
-    id: 'demo-2', task_id: 'yoyo_sushi_1739888240', name: 'YOYO SUSHI · ул. Ставропольская',
-    addr1: 'улица Ставропольская, 218', addr2: 'улица Селезнева, 4/15',
-    link: 'https://eda.yandex.ru/r/yoyo_sushi_1739888240',
-    status: 'available', created_at: new Date().toISOString(), expires_at: null, created_by: null,
-  },
-  {
-    id: 'demo-3', task_id: 'umami_sushi_1739888245', name: 'UMAMI SUSHI · ул. Красная',
-    addr1: 'улица Красная, 176', addr2: 'улица Северная, 324',
-    link: 'https://eda.yandex.ru/r/umami_sushi_1739888245',
-    status: 'available', created_at: new Date().toISOString(), expires_at: null, created_by: null,
-  },
-];
-
 function TimerBadge({ expiresAt }: { expiresAt: string }) {
   const [timeLeft, setTimeLeft] = useState('');
   useEffect(() => {
@@ -68,7 +47,7 @@ interface Props {
 export default function ExecutorDashboard({ demoMode = false, onExitDemo }: Props) {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
-  const [tasks, setTasks] = useState<Task[]>(demoMode ? DEMO_TASKS : []);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [orderInput, setOrderInput] = useState('');
   const [showInstruction, setShowInstruction] = useState(false);
