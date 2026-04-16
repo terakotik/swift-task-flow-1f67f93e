@@ -1,6 +1,9 @@
-import { Shield, Clock, Wallet, Lock, Users, ClipboardList, Star, Headphones } from 'lucide-react';
+import { Shield, Clock, Wallet, Lock, Users, ClipboardList, Star, Headphones, BookOpen, MessageCircle, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Landing() {
+  const [instructionOpen, setInstructionOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
@@ -14,7 +17,7 @@ export default function Landing() {
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
           <a href="#how" className="hover:text-foreground transition-colors">Как это работает</a>
           <a href="#benefits" className="hover:text-foreground transition-colors">Условия</a>
-          <a href="#footer" className="hover:text-foreground transition-colors">Выплаты</a>
+          <a href="#payouts" className="hover:text-foreground transition-colors">Выплаты</a>
         </nav>
       </header>
 
@@ -37,10 +40,19 @@ export default function Landing() {
             </p>
 
             <div className="bg-card border border-border rounded-2xl p-5 max-w-md">
-              <p className="text-sm font-semibold text-foreground mb-1">🔒 Регистрация только через администратора</p>
-              <p className="text-xs text-muted-foreground">
-                Чтобы получить доступ к заданиям, свяжитесь с администратором. Мы работаем только с проверенными исполнителями.
+              <p className="text-sm font-semibold text-foreground mb-2">🔒 Регистрация только через администратора</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Чтобы получить доступ к заданиям и начать зарабатывать, свяжитесь с администратором. Мы работаем только с проверенными исполнителями.
               </p>
+              <a
+                href="https://t.me/yoclick_admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
+              >
+                <MessageCircle size={16} />
+                Написать администратору
+              </a>
             </div>
           </div>
 
@@ -147,8 +159,113 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Instruction */}
+      <section id="how" className="px-6 py-16 max-w-5xl mx-auto">
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          <button
+            onClick={() => setInstructionOpen(!instructionOpen)}
+            className="w-full flex items-center justify-between p-6 text-left hover:bg-secondary/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <BookOpen size={22} className="text-primary" />
+              <span className="font-bold text-lg">Инструкция исполнителя</span>
+            </div>
+            <ChevronDown size={20} className={`text-muted-foreground transition-transform ${instructionOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {instructionOpen && (
+            <div className="px-6 pb-6 space-y-6 text-sm text-muted-foreground leading-relaxed">
+              <div className="space-y-2">
+                <h4 className="font-bold text-foreground">1. Получите доступ</h4>
+                <p>Свяжитесь с администратором через Telegram. После проверки вам выдадут логин и пароль для входа в систему.</p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-bold text-foreground">2. Войдите в кабинет</h4>
+                <p>Используйте выданные данные для входа. В личном кабинете вы увидите список доступных заданий с подробным описанием.</p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-bold text-foreground">3. Примите задание</h4>
+                <p>Выберите задание из списка и нажмите «Принять». У вас будет ограниченное время на его выполнение. Следуйте инструкциям в карточке задания.</p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-bold text-foreground">4. Выполните задание</h4>
+                <p>Перейдите по ссылке в задании, выполните все указанные действия. Оставьте отзыв или оценку согласно требованиям. Будьте внимательны — задание должно выглядеть естественно.</p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-bold text-foreground">5. Подтвердите выполнение</h4>
+                <p>После выполнения нажмите «Завершить» в карточке задания. Администратор проверит результат и подтвердит выполнение.</p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-bold text-foreground">6. Получите выплату</h4>
+                <p>После подтверждения сумма будет зачислена на ваш баланс. Выплаты производятся на крипто-кошелек Bybit. Минимальная сумма вывода — 500 ₽.</p>
+              </div>
+
+              <div className="bg-destructive/10 rounded-xl p-4 space-y-1">
+                <p className="font-bold text-destructive">⚠️ Важно</p>
+                <ul className="list-disc list-inside space-y-1 text-xs">
+                  <li>Не используйте VPN при выполнении заданий</li>
+                  <li>Один аккаунт — один человек</li>
+                  <li>За накрутку или обман — блокировка без выплат</li>
+                  <li>Выполняйте задания качественно и в срок</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Payouts */}
+      <section id="payouts" className="px-6 py-16 max-w-5xl mx-auto">
+        <h2 className="text-3xl font-black text-center mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+          Выплаты
+        </h2>
+        <p className="text-center text-muted-foreground text-sm mb-8 max-w-md mx-auto">
+          Мы платим каждый день. Минимальная сумма вывода — 500 ₽. Переводы на крипто-кошелек Bybit.
+        </p>
+        <div className="grid sm:grid-cols-3 gap-4 max-w-lg mx-auto">
+          <div className="bg-card border border-border rounded-2xl p-5 text-center">
+            <p className="text-2xl font-black text-accent">50–150 ₽</p>
+            <p className="text-xs text-muted-foreground mt-1">за одно задание</p>
+          </div>
+          <div className="bg-card border border-border rounded-2xl p-5 text-center">
+            <p className="text-2xl font-black text-primary">500 ₽</p>
+            <p className="text-xs text-muted-foreground mt-1">мин. вывод</p>
+          </div>
+          <div className="bg-card border border-border rounded-2xl p-5 text-center">
+            <p className="text-2xl font-black text-foreground">USDT</p>
+            <p className="text-xs text-muted-foreground mt-1">Bybit кошелек</p>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="px-6 py-16 max-w-5xl mx-auto text-center">
+        <div className="bg-card border border-border rounded-3xl p-10">
+          <h2 className="text-2xl font-black mb-3" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+            Готов начать зарабатывать?
+          </h2>
+          <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
+            Напиши администратору, получи доступ и выполняй задания уже сегодня.
+          </p>
+          <a
+            href="https://t.me/yoclick_admin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors"
+          >
+            <MessageCircle size={18} />
+            Написать администратору
+          </a>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer id="footer" className="px-6 py-8 border-t border-border">
+      <footer className="px-6 py-8 border-t border-border">
         <p className="text-center text-xs text-muted-foreground">
           © 2026 Yoclick. Human Intelligence Network.
         </p>
