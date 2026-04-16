@@ -41,7 +41,8 @@ export default function SuperAdmin() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const isSuperAdmin = user?.email === SUPER_ADMIN_EMAIL;
-  const canManageTasks = isSuperAdmin && isAdmin;
+  const currentUserIsAdmin = !!user && roles.some(role => role.user_id === user.id && role.role === 'admin');
+  const canManageTasks = isSuperAdmin && (isAdmin || currentUserIsAdmin);
 
   useEffect(() => {
     if (isSuperAdmin) loadData();
