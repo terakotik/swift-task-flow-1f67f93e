@@ -263,25 +263,16 @@ export default function AdminDashboard() {
             </button>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setActiveTab('pending')}
-            className={`flex-1 py-2 rounded-xl text-xs font-black uppercase ${activeTab === 'pending' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
-          >
-            На проверке
-          </button>
-          <button
-            onClick={() => setActiveTab('done')}
-            className={`flex-1 py-2 rounded-xl text-xs font-black uppercase ${activeTab === 'done' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
-          >
-            Завершённые
-          </button>
-          <button
-            onClick={() => setActiveTab('archive')}
-            className={`flex-1 py-2 rounded-xl text-xs font-black uppercase ${activeTab === 'archive' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
-          >
-            Архив
-          </button>
+        <div className="flex gap-1.5">
+          {(['pending', 'done', 'mytasks', 'archive'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase ${activeTab === tab ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
+            >
+              {tab === 'pending' ? 'Заявки' : tab === 'done' ? 'Готовые' : tab === 'mytasks' ? 'Задания' : 'Архив'}
+            </button>
+          ))}
         </div>
       </header>
 
