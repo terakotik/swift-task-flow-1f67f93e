@@ -15,6 +15,7 @@ function randomUID() {
 
 export default function Landing() {
   const [instructionOpen, setInstructionOpen] = useState(false);
+  const [agreeChecked, setAgreeChecked] = useState(false);
   const [payment, setPayment] = useState({ amount: randomAmount(), uid: randomUID() });
   const [animKey, setAnimKey] = useState(0);
 
