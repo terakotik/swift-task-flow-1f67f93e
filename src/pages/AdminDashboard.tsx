@@ -38,8 +38,8 @@ function parseTaskText(text: string): { name: string; addr1: string; addr2: stri
   let name = '';
 
   const skipPatterns = [
-    /^российская\s+федерация/i,
-    /^россия/i,
+    /^российская\s+федерация$/i,
+    /^россия$/i,
     /^москва$/i,
     /^\[/,
     /^яндекс$/i,
