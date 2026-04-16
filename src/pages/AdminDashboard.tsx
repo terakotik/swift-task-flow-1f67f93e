@@ -264,15 +264,24 @@ export default function AdminDashboard() {
           </div>
         </div>
         <div className="flex gap-1.5">
-          {(['pending', 'done', 'mytasks', 'archive'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase ${activeTab === tab ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
-            >
-              {tab === 'pending' ? 'Заявки' : tab === 'done' ? 'Готовые' : tab === 'mytasks' ? 'Задания' : 'Архив'}
-            </button>
-          ))}
+          {(['pending', 'done', 'mytasks', 'archive'] as const).map(tab => {
+            const pendingCount = completedTasks.filter(c => c.status === 'pending').length;
+            const showDot = tab === 'pending' && pendingCount > 0 && activeTab !== 'pending';
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`relative flex-1 py-2 rounded-xl text-[10px] font-black uppercase ${activeTab === tab ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
+              >
+                {showDot && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full text-[8px] text-destructive-foreground flex items-center justify-center font-black animate-pulse">
+                    {pendingCount}
+                  </span>
+                )}
+                {tab === 'pending' ? 'Заявки' : tab === 'done' ? 'Готовые' : tab === 'mytasks' ? 'Задания' : 'Архив'}
+              </button>
+            );
+          })}
         </div>
       </header>
 
