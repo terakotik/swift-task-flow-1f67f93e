@@ -93,7 +93,8 @@ export default function ExecutorDashboard({ demoMode = false, onExitDemo }: Prop
     const { data } = await supabase
       .from('tasks')
       .select('*')
-      .eq('status', 'available');
+      .eq('status', 'available')
+      .order('created_at', { ascending: false });
     // Filter out expired tasks client-side
     const active = (data ?? []).filter(t => !t.expires_at || t.expires_at > now);
     setTasks(active);
