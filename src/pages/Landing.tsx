@@ -114,6 +114,15 @@ export default function Landing() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold">Яндекс Еда</p>
+                      <div className="flex gap-0.5">
+                        {[1,2,3,4,5].map(i => (
+                          <Star key={i} size={10} className="text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground">Задания обновляются ежедневно</p>
                 </div>
