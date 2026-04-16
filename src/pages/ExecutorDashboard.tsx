@@ -235,6 +235,11 @@ export default function ExecutorDashboard({ demoMode = false, onExitDemo }: Prop
               <button onClick={() => setShowInstruction(true)} className="p-2 bg-primary/10 text-primary rounded-full">
                 <Info size={24} />
               </button>
+              {!demoMode && (
+                <button onClick={() => setShowSettings(true)} className="p-2 bg-muted text-foreground rounded-full">
+                  <Settings size={24} />
+                </button>
+              )}
               {demoMode ? (
                 <button onClick={onExitDemo} className="p-2 bg-destructive/10 text-destructive rounded-full">
                   <LogOut size={24} />
