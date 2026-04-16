@@ -1,5 +1,6 @@
-import { Shield, Clock, Wallet, Lock, Users, ClipboardList, Star, Headphones, BookOpen, MessageCircle, ChevronDown } from 'lucide-react';
+import { Shield, Clock, Wallet, Lock, Users, ClipboardList, Star, Headphones, BookOpen, MessageCircle, ChevronDown, ClipboardCheck, CircleAlert, Bitcoin } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 function randomAmount() {
   const num = Math.floor(Math.random() * 900) + 100; // 100-999
@@ -14,6 +15,7 @@ function randomUID() {
 
 export default function Landing() {
   const [instructionOpen, setInstructionOpen] = useState(false);
+  const [agreeChecked, setAgreeChecked] = useState(false);
   const [payment, setPayment] = useState({ amount: randomAmount(), uid: randomUID() });
   const [animKey, setAnimKey] = useState(0);
 
@@ -196,49 +198,125 @@ export default function Landing() {
               <BookOpen size={22} className="text-primary" />
               <span className="font-bold text-lg">Инструкция исполнителя</span>
             </div>
-            <ChevronDown size={20} className={`text-muted-foreground transition-transform ${instructionOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={20} className={`text-muted-foreground transition-transform duration-300 ${instructionOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {instructionOpen && (
-            <div className="px-6 pb-6 space-y-6 text-sm text-muted-foreground leading-relaxed">
-              <div className="space-y-2">
-                <h4 className="font-bold text-foreground">1. Получите доступ</h4>
-                <p>Свяжитесь с администратором через Telegram. После проверки вам выдадут логин и пароль для входа в систему.</p>
+            <div className="p-6 md:p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Левая колонка */}
+                <div className="lg:col-span-5 flex flex-col gap-5">
+                  {/* Обязательные условия */}
+                  <div className="bg-[#FFF9E5] border border-[#FFE066] rounded-2xl p-5 shadow-sm">
+                    <h4 className="text-[#1a1a1a] font-black text-sm mb-4 flex items-center gap-2 uppercase tracking-wide">
+                      <ClipboardCheck size={20} className="text-[#FFCC00] drop-shadow-sm" />
+                      Обязательные условия
+                    </h4>
+                    <div className="space-y-4">
+                      <div className="bg-white/60 rounded-xl p-3.5 border border-[#FFE066]/50">
+                        <p className="text-[#1e293b] text-sm leading-snug font-medium mb-2 flex items-start gap-2.5">
+                          <span className="text-[#FFCC00] text-lg mt-0.5">🛂</span>
+                          <span>Только <span className="font-bold border-b border-[#FFCC00]">граждане РФ</span>. Аккаунт должен быть русским.</span>
+                        </p>
+                        <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase tracking-wide w-full">
+                          🚫 Отзывы из других стран не засчитываются!
+                        </div>
+                      </div>
+                      <div className="bg-white/60 rounded-xl p-3.5 border border-[#FFE066]/50">
+                        <p className="text-[#1e293b] text-sm leading-snug font-medium mb-2 flex items-start gap-2.5">
+                          <span className="text-[#FFCC00] text-lg mt-0.5">🚕</span>
+                          <span>Рабочий аккаунт <span className="font-bold border-b border-[#FFCC00]">Яндекс Go</span>.</span>
+                        </p>
+                        <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase tracking-wide w-full">
+                          🚫 С новых аккаунтов отзывы не идут!
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Важное пояснение */}
+                  <div className="bg-red-50 border border-red-100 rounded-2xl p-5 shadow-sm">
+                    <h4 className="text-red-600 font-black text-sm mb-3 flex items-center gap-2 uppercase tracking-wide">
+                      <CircleAlert size={18} />
+                      ВАЖНОЕ ПОЯСНЕНИЕ
+                    </h4>
+                    <p className="text-red-900/90 text-sm leading-relaxed font-medium">
+                      После нажатия кнопки «Согласен» менеджер переходит в режим <span className="font-bold underline">ONLINE</span>. Не тратьте впустую время команды — приступайте только при полной готовности.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Правая колонка — Порядок действий */}
+                <div className="lg:col-span-7 flex flex-col justify-center space-y-3">
+                  <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-2 px-1">Порядок действий:</h3>
+
+                  <div className="flex items-center gap-4 bg-card border border-border p-4 rounded-xl shadow-sm">
+                    <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center font-black text-foreground text-sm shrink-0">1</div>
+                    <p className="text-sm md:text-base text-foreground font-medium leading-snug">Найти ресторан по названию от менеджера.</p>
+                  </div>
+
+                  <div className="flex items-center gap-4 bg-card border border-border p-4 rounded-xl shadow-sm">
+                    <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center font-black text-foreground text-sm shrink-0">2</div>
+                    <p className="text-sm md:text-base text-foreground font-medium leading-snug">Сделать симуляцию заказа.</p>
+                  </div>
+
+                  <div className="flex items-center gap-4 bg-primary/5 border border-primary/20 p-4 rounded-xl shadow-sm">
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center font-black text-primary text-sm shrink-0">3</div>
+                    <p className="text-sm md:text-base text-foreground font-medium leading-snug">Поставить 5 звезд <span className="font-bold text-foreground border-b border-foreground/30 bg-yellow-100 px-1 rounded">(без текста!)</span>.</p>
+                  </div>
+
+                  <div className="flex items-center gap-4 bg-card border border-border p-4 rounded-xl shadow-sm">
+                    <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center font-black text-green-600 text-sm shrink-0">
+                      <Wallet size={16} />
+                    </div>
+                    <p className="text-sm md:text-base text-foreground font-medium leading-snug">Получить выплату на <span className="font-bold text-green-600">Bybit UID</span>.</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <h4 className="font-bold text-foreground">2. Войдите в кабинет</h4>
-                <p>Используйте выданные данные для входа. В личном кабинете вы увидите список доступных заданий с подробным описанием.</p>
-              </div>
+              {/* Нижний блок */}
+              <div className="mt-8 pt-6 border-t border-border">
+                {/* Bybit блок */}
+                <div className="bg-[#171717] rounded-2xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-6 border border-[#333] mb-6 shadow-xl relative overflow-hidden">
+                  <div className="text-center md:text-left">
+                    <h4 className="text-white font-bold text-base mb-1.5 flex items-center justify-center md:justify-start gap-2">
+                      <Bitcoin size={20} className="text-[#F7A600]" />
+                      Куда выводить деньги?
+                    </h4>
+                    <p className="text-[#94a3b8] text-sm leading-relaxed max-w-xl">
+                      Рекомендуем Bybit для быстрых выплат. Если не получается, используйте Telegram кошелек.
+                    </p>
+                  </div>
+                  <div className="shrink-0 w-full md:w-auto">
+                    <a
+                      href="https://www.bybit.com/register"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full md:w-auto bg-[#F7A600] text-black font-black uppercase tracking-widest px-8 py-4 rounded-xl hover:bg-[#FFC033] transition-all text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(247,166,0,0.3)]"
+                    >
+                      ＋ Создать Bybit
+                    </a>
+                  </div>
+                </div>
 
-              <div className="space-y-2">
-                <h4 className="font-bold text-foreground">3. Примите задание</h4>
-                <p>Выберите задание из списка и нажмите «Принять». У вас будет ограниченное время на его выполнение. Следуйте инструкциям в карточке задания.</p>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="font-bold text-foreground">4. Выполните задание</h4>
-                <p>Перейдите по ссылке в задании, выполните все указанные действия. Оставьте отзыв или оценку согласно требованиям. Будьте внимательны — задание должно выглядеть естественно.</p>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="font-bold text-foreground">5. Подтвердите выполнение</h4>
-                <p>После выполнения нажмите «Завершить» в карточке задания. Администратор проверит результат и подтвердит выполнение.</p>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="font-bold text-foreground">6. Получите выплату</h4>
-                <p>После подтверждения сумма будет зачислена на ваш баланс. Выплаты производятся на крипто-кошелек Bybit. Минимальная сумма вывода — 200 ₽.</p>
-              </div>
-
-              <div className="bg-destructive/10 rounded-xl p-4 space-y-1">
-                <p className="font-bold text-destructive">⚠️ Важно</p>
-                <ul className="list-disc list-inside space-y-1 text-xs">
-                  <li>Не используйте VPN при выполнении заданий</li>
-                  <li>Один аккаунт — один человек</li>
-                  <li>За накрутку или обман — блокировка без выплат</li>
-                  <li>Выполняйте задания качественно и в срок</li>
-                </ul>
+                {/* Чекбокс и кнопка */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-5 bg-secondary p-4 rounded-2xl border border-border">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <Checkbox
+                      checked={agreeChecked}
+                      onCheckedChange={(checked) => setAgreeChecked(checked === true)}
+                    />
+                    <span className="text-sm md:text-base font-bold text-foreground group-hover:text-foreground/80 transition-colors select-none uppercase tracking-wide">
+                      Правила прочитаны, РФ-аккаунт Яндекс активен
+                    </span>
+                  </label>
+                  <button
+                    disabled={!agreeChecked}
+                    className="w-full md:w-auto bg-primary text-primary-foreground px-12 py-4 rounded-xl font-black text-sm md:text-base uppercase tracking-widest transition-all duration-200 disabled:bg-muted disabled:text-muted-foreground hover:bg-primary/90"
+                  >
+                    СОГЛАСЕН
+                  </button>
+                </div>
               </div>
             </div>
           )}
