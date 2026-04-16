@@ -1,5 +1,6 @@
-import { Shield, Clock, Wallet, Lock, Users, ClipboardList, Star, Headphones, BookOpen, MessageCircle, ChevronDown } from 'lucide-react';
+import { Shield, Clock, Wallet, Lock, Users, ClipboardList, Star, Headphones, BookOpen, MessageCircle, ChevronDown, ClipboardCheck, CircleAlert, Bitcoin } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 function randomAmount() {
   const num = Math.floor(Math.random() * 900) + 100; // 100-999
